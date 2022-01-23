@@ -11,8 +11,8 @@ type (
 )
 
 const (
-	keyNotExistErrorTemplate     = "key %q not exist"
-	keyAlreadyExistErrorTemplate = "key %q already exist"
+	keyNotExistErrorTemplate        = "key %q not exist"
+	keyAlreadyExistErrorTemplate    = "key %q already exist"
 	keyIsNotComparableErrorTemplate = "key %q is not comparable"
 )
 
