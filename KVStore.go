@@ -5,10 +5,10 @@ import (
 )
 
 type (
-	// KVStoreI Be careful if you try to use not comparable object as a key
+	// KVStore Be careful if you try to use not comparable object as a key
 	// Then panic will acquire
-	KVStoreI interface {
-		Get(k interface{}) (interface{}, bool)
+	KVStore interface {
+		Get(k interface{}) (interface{}, error)
 		Post(k, v interface{}) error
 		Put(k, v interface{}) error
 		Delete(k interface{}) error
@@ -20,14 +20,14 @@ type (
 	}
 )
 
-func NewKVStore() KVStoreI {
+func NewKVStore() KVStore {
 	return &kvStore{
 		RWMutex: &sync.RWMutex{},
 		store:   map[interface{}]interface{}{},
 	}
 }
 
-func (kv *kvStore) Get(k interface{}) (interface{}, bool) {
+func (kv *kvStore) Get(k interface{}) (interface{}, error) {
 	kv.RWMutex.RLock()
 	defer kv.RWMutex.RUnlock()
 
@@ -35,7 +35,7 @@ func (kv *kvStore) Get(k interface{}) (interface{}, bool) {
 }
 
 func (kv *kvStore) Post(k, v interface{}) error {
-	if _, exist := kv.Get(k); exist {
+	if _, err := kv.Get(k); err == nil {
 		return NewAlreadyExistError(k)
 	}
 
@@ -47,8 +47,8 @@ func (kv *kvStore) Post(k, v interface{}) error {
 }
 
 func (kv *kvStore) Put(k, v interface{}) error {
-	if _, exist := kv.Get(k); !exist {
-		return NewKeyNotExistError(k)
+	if _, err := kv.Get(k); err != nil {
+		return err
 	}
 
 	kv.RWMutex.Lock()
@@ -59,8 +59,8 @@ func (kv *kvStore) Put(k, v interface{}) error {
 }
 
 func (kv *kvStore) Delete(k interface{}) error {
-	if _, exist := kv.Get(k); !exist {
-		return NewKeyNotExistError(k)
+	if _, err := kv.Get(k); err != nil {
+		return err
 	}
 
 	kv.RWMutex.Lock()
@@ -69,9 +69,12 @@ func (kv *kvStore) Delete(k interface{}) error {
 	return nil
 }
 
-func (kv *kvStore) get(k interface{}) (interface{}, bool) {
+func (kv *kvStore) get(k interface{}) (interface{}, error) {
 	v, ok := kv.store[k]
-	return v, ok
+	if !ok {
+		return nil, NewKeyNotExistError(k)
+	}
+	return v, nil
 }
 
 func (kv *kvStore) storeKV(k, v interface{}) {
