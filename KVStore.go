@@ -15,14 +15,14 @@ type (
 	}
 
 	kvStore struct {
-		RWMutex *sync.RWMutex
+		RWMutex sync.RWMutex
 		store   map[interface{}]interface{}
 	}
 )
 
 func NewKVStore() KVStore {
 	return &kvStore{
-		RWMutex: &sync.RWMutex{},
+		RWMutex: sync.RWMutex{},
 		store:   map[interface{}]interface{}{},
 	}
 }
