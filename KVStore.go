@@ -35,37 +35,35 @@ func (kv *kvStore) Get(k interface{}) (interface{}, error) {
 }
 
 func (kv *kvStore) Post(k, v interface{}) error {
-	if _, err := kv.Get(k); err == nil {
+	kv.RWMutex.Lock()
+	defer kv.RWMutex.Unlock()
+	if _, err := kv.get(k); err == nil {
 		return NewAlreadyExistError(k)
 	}
 
-	kv.RWMutex.Lock()
 	kv.storeKV(k, v)
-	kv.RWMutex.Unlock()
-
 	return nil
 }
 
 func (kv *kvStore) Put(k, v interface{}) error {
-	if _, err := kv.Get(k); err != nil {
+	kv.RWMutex.Lock()
+	defer kv.RWMutex.Unlock()
+	if _, err := kv.get(k); err != nil {
 		return err
 	}
 
-	kv.RWMutex.Lock()
 	kv.storeKV(k, v)
-	kv.RWMutex.Unlock()
-
 	return nil
 }
 
 func (kv *kvStore) Delete(k interface{}) error {
-	if _, err := kv.Get(k); err != nil {
+	kv.RWMutex.Lock()
+	defer kv.RWMutex.Unlock()
+	if _, err := kv.get(k); err != nil {
 		return err
 	}
 
-	kv.RWMutex.Lock()
 	kv.delete(k)
-	kv.RWMutex.Unlock()
 	return nil
 }
 
