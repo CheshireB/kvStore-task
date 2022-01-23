@@ -22,11 +22,11 @@ func NewAlreadyExistError(key interface{}) error {
 }
 
 func (e *keyNotExistError) Error() string {
-	return fmt.Sprintf(keyNotExistErrorTemplate, e.key)
+	return fmt.Sprintf(keyNotExistErrorTemplate, fmt.Sprintf("%v", e.key))
 }
 
 func (e *keyAlreadyExistError) Error() string {
-	return fmt.Sprintf(keyAlreadyExistErrorTemplate, e.key)
+	return fmt.Sprintf(keyAlreadyExistErrorTemplate, fmt.Sprintf("%v", e.key))
 }
 
 func IsKeyNotExistError(err error) bool {

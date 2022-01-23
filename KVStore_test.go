@@ -63,6 +63,7 @@ func TestKvStore_Get(t *testing.T) {
 
 		actValue, err := kv.Get(expKey)
 		assert.Error(t, err)
+		assert.Equal(t, NewKeyNotExistError(expKey).Error(), err.Error())
 		assert.Nil(t, actValue)
 	})
 
@@ -99,7 +100,7 @@ func TestKvStore_Post(t *testing.T) {
 
 		err = kv.Post(expKey, expValue)
 		assert.Error(t, err)
-		assert.Equal(t, fmt.Sprintf(keyAlreadyExistErrorTemplate, expKey), err.Error())
+		assert.Equal(t, NewAlreadyExistError(expKey).Error(), err.Error())
 	})
 
 	t.Run("Concurrency access to map", func(t *testing.T) {
@@ -126,7 +127,7 @@ func TestKvStore_Put(t *testing.T) {
 
 		err := kv.Put(expKey, expValue)
 		assert.Error(t, err)
-		assert.Equal(t, fmt.Sprintf(keyNotExistErrorTemplate, expKey), err.Error())
+		assert.Equal(t, NewKeyNotExistError(expKey).Error(), err.Error())
 	})
 
 	t.Run("Concurrency access to map", func(t *testing.T) {
@@ -152,12 +153,13 @@ func TestKvStore_Put(t *testing.T) {
 
 func TestKvStore_Delete(t *testing.T) {
 	t.Run("Key not exist", func(t *testing.T) {
-		expKey := "exp_key"
+		expKey := 101
 		kv := NewKVStore()
 
 		err := kv.Delete(expKey)
+		fmt.Println(err.Error())
 		assert.Error(t, err)
-		assert.Equal(t, fmt.Sprintf(keyNotExistErrorTemplate, expKey), err.Error())
+		assert.Equal(t, NewKeyNotExistError(expKey).Error(), err.Error())
 	})
 
 	t.Run("Concurrency access to map", func(t *testing.T) {
