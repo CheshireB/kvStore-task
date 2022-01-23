@@ -67,6 +67,16 @@ func TestKvStore_Get(t *testing.T) {
 		assert.Nil(t, actValue)
 	})
 
+	t.Run("Key not comparable", func(t *testing.T) {
+		expKey := map[struct{}]string{}
+		kv := NewKVStore()
+
+		actValue, err := kv.Get(expKey)
+		assert.Error(t, err)
+		assert.Equal(t, NewKeyIsNotComparableError(expKey).Error(), err.Error())
+		assert.Nil(t, actValue)
+	})
+
 	t.Run("Concurrency access to map", func(t *testing.T) {
 		kv := NewKVStore()
 
@@ -100,7 +110,17 @@ func TestKvStore_Post(t *testing.T) {
 
 		err = kv.Post(expKey, expValue)
 		assert.Error(t, err)
-		assert.Equal(t, NewAlreadyExistError(expKey).Error(), err.Error())
+		assert.Equal(t, NewKeyAlreadyExistError(expKey).Error(), err.Error())
+	})
+
+	t.Run("Key not comparable", func(t *testing.T) {
+		expKey := map[struct{}]string{}
+		expVal := "exp_val"
+		kv := NewKVStore()
+
+		err := kv.Post(expKey, expVal)
+		assert.Error(t, err)
+		assert.Equal(t, NewKeyIsNotComparableError(expKey).Error(), err.Error())
 	})
 
 	t.Run("Concurrency access to map", func(t *testing.T) {
@@ -128,6 +148,16 @@ func TestKvStore_Put(t *testing.T) {
 		err := kv.Put(expKey, expValue)
 		assert.Error(t, err)
 		assert.Equal(t, NewKeyNotExistError(expKey).Error(), err.Error())
+	})
+
+	t.Run("Key not comparable", func(t *testing.T) {
+		expKey := map[struct{}]string{}
+		expVal := "exp_val"
+		kv := NewKVStore()
+
+		err := kv.Put(expKey, expVal)
+		assert.Error(t, err)
+		assert.Equal(t, NewKeyIsNotComparableError(expKey).Error(), err.Error())
 	})
 
 	t.Run("Concurrency access to map", func(t *testing.T) {
@@ -160,6 +190,15 @@ func TestKvStore_Delete(t *testing.T) {
 		fmt.Println(err.Error())
 		assert.Error(t, err)
 		assert.Equal(t, NewKeyNotExistError(expKey).Error(), err.Error())
+	})
+
+	t.Run("Key not comparable", func(t *testing.T) {
+		expKey := map[struct{}]string{}
+		kv := NewKVStore()
+
+		err := kv.Delete(expKey)
+		assert.Error(t, err)
+		assert.Equal(t, NewKeyIsNotComparableError(expKey).Error(), err.Error())
 	})
 
 	t.Run("Concurrency access to map", func(t *testing.T) {

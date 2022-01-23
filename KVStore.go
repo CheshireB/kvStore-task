@@ -37,12 +37,15 @@ func (kv *kvStore) Get(k interface{}) (interface{}, error) {
 func (kv *kvStore) Post(k, v interface{}) error {
 	kv.RWMutex.Lock()
 	defer kv.RWMutex.Unlock()
-	if _, err := kv.get(k); err == nil {
-		return NewAlreadyExistError(k)
+
+	if _, err := kv.get(k); IsKeyNotExistError(err) {
+		kv.storeKV(k, v)
+		return nil
+	} else if err != nil {
+		return err
 	}
 
-	kv.storeKV(k, v)
-	return nil
+	return NewKeyAlreadyExistError(k)
 }
 
 func (kv *kvStore) Put(k, v interface{}) error {
@@ -67,7 +70,13 @@ func (kv *kvStore) Delete(k interface{}) error {
 	return nil
 }
 
-func (kv *kvStore) get(k interface{}) (interface{}, error) {
+func (kv *kvStore) get(k interface{}) (v interface{}, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = NewKeyIsNotComparableError(k)
+		}
+	}()
+
 	v, ok := kv.store[k]
 	if !ok {
 		return nil, NewKeyNotExistError(k)
