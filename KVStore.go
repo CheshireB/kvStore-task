@@ -6,7 +6,7 @@ import (
 
 type (
 	// KVStore Be careful if you try to use not comparable object as a key
-	// Then panic will acquire
+	// Then keyIsNotComparableError will acquire
 	KVStore interface {
 		Get(k interface{}) (interface{}, error)
 		Post(k, v interface{}) error
