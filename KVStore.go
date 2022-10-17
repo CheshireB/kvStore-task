@@ -21,6 +21,7 @@ type (
 )
 
 func NewKVStore() KVStore {
+
 	return &kvStore{
 		RWMutex: sync.RWMutex{},
 		store:   map[interface{}]interface{}{},
